@@ -23,15 +23,23 @@ def A():
         )
     
 
-    models = load_all_vaes()
-    m = models["vae_d3_seed1000.pt"]
-    encoder = m.encoder
-    decoder0 = m.decoders[0]
 
 
 @app.command()
 def B(): 
-    pass 
+    set_seed(42)
+
+    train_super_vae_models(
+        Q=TrainingConfig.num_vaes, 
+        epochs_per_decoder=TrainingConfig.epochs_per_decoder, 
+        base_seed=1000, 
+        max_decoder_num=TrainingConfig.max_decoder_num
+    )
+    
+    models = load_all_vaes()
+    m = models["vae_d3_seed1000.pt"]
+    encoder = m.encoder
+    decoder0 = m.decoders[0]
 
 
 
