@@ -20,6 +20,7 @@ set_seed(42)
 
 
 def subsample(data, targets, num_data, num_classes):
+    """ subsample the data to num_data images """
     idx = targets < num_classes  # Select samples with class labels less than num_classes (e.g., only classes 0, 1, 2)
     new_data = data[idx][:num_data].unsqueeze(1).to(torch.float32) / 255  # Select the first num_data images and normalize to [0,1]
     new_targets = targets[idx][:num_data]  # Select corresponding labels for the subsampled images

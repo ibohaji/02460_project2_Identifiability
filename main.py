@@ -2,14 +2,14 @@ import typer
 from src.vae import * 
 from src.train import train_super_vae_models, load_all_vaes, train_single_vae
 from src.utils import set_seed 
-from configs import TrainingConfig
+from configs import TrainingConfig, GeodesicConfig
 from loguru import logger
-
+from src.geodesics import optimize_geodesic
 app = typer.Typer()
 
 
 @app.command()
-def A(): 
+def train_vae_single(): 
     set_seed(42)
 
     # Train a single VAE 
@@ -21,31 +21,42 @@ def A():
         epochs_per_decoder=TrainingConfig.epochs_per_decoder, 
         lr=TrainingConfig.learning_rate
         )
-    # Load the VAE 
-    models = load_all_vaes()
-    m = models["vae_d3_seed1000.pt"]
-    encoder = m.encoder
+
+ 
+
+
+
+@app.command()
+def optim_geodesic():
+    import os  
+    from src.train import load_model
+    set_seed(42)
 
     # load the data 
     from src.data import train_data
-    data = train_data
+    images, labels = train_data[:]  # or train_data.tensors
 
-    # Encode the data 
-    encoded_data = encoder(data)
-    # minimize the energy of the curve 
-    from src.curves import CubicCurve, compute_curve_energy
-    curve = CubicCurve(encoded_data[0], encoded_data[1])
-    energy = compute_curve_energy(curve, m.decoders, T=TrainingConfig.num_time_steps, num_samples=TrainingConfig.num_samples, fixed_indices=None, device=TrainingConfig.device)
-    logger.info(f"Energy of the curve: {energy}")
-    # Compute the geodesics
-    from src.geodesics import optimize_geodesic
-    c0 = encoded_data[0]
-    c1 = encoded_data[1]
-    decoders = m.decoders
-    T = TrainingConfig.num_time_steps
-    steps = TrainingConfig.optimization_steps
-    lr = TrainingConfig.learning_rate
-    # Plot the geodesics 
+    # load the model
+    model = load_model("experiments/vae_d3_seed1000.pt")
+    # Encode 
+    with torch.no_grad():
+        encoder = model.encoder
+        latent_dist = encoder(images)  # dim = 2 
+        latent_variables = latent_dist.rsample()
+        logger.info(f"Latent variables shape: {latent_variables.shape}")
+    # Plot the latent variables 
+    from src.visualization import plot_latent_variables
+    plot_latent_variables(latent_variables, labels, save_path="latent_variables.png")
+
+    optimize_geodesic(
+        latent_variables[0], 
+        latent_variables[1], 
+        model.decoders, 
+        T=GeodesicConfig.num_time_steps, 
+        steps=GeodesicConfig.optimization_steps, 
+        lr=GeodesicConfig.learning_rate, 
+        device=GeodesicConfig.device
+    ) 
     
 
 

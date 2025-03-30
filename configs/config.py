@@ -9,7 +9,7 @@ class TrainingConfig:
     num_classes: int = 3 
     batch_size: int = 32 
     latent_dim: int = 2 
-    epochs_per_decoder: int = 400
+    epochs_per_decoder: int = 100
     base_seed: int = 1000 
     num_vaes: int = 1 
     max_decoder_num: int = 3
@@ -25,3 +25,4 @@ class GeodesicConfig:
     learning_rate: float = 1e-2 
     early_stopping_patience: int = 100 
     early_stopping_delta: float = 1e-4 
+    device: str = "cuda" if torch.cuda.is_available() else "cpu" 

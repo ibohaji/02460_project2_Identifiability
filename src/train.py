@@ -80,8 +80,10 @@ def train_single_vae(seed, save_path, S, epochs_per_decoder, lr):
     ]
 
     losses = train(model, optimizers, mnist_train_loader, epochs_per_decoder, TrainingConfig.device)
-
+    logger.info(f"Training done, saving the model")
+    os.makedirs(os.path.dirname(save_path), exist_ok=True) # make directory if not exist
     torch.save(model.state_dict(), save_path)
+    logger.info(f"Model saved to {save_path}")
     plt.figure()
     plt.plot(range(5000, len(losses)), losses[5000:])
     plt.xlabel("Iteration")
@@ -111,10 +113,21 @@ def train_super_vae_models(Q=10, epochs_per_decoder=400, base_seed=1000, max_dec
 
 
 
+
+def load_model(model_path: str, device = torch.device("cuda" if torch.cuda.is_available() else "cpu")):
+    decoders = [GaussianDecoder(new_decoder())]
+    encoder = GaussianEncoder(new_encoder())
+    prior = GaussianPrior(M=TrainingConfig.latent_dim)  
+
+    model = VAE(prior, decoders, encoder).to(device)
+    model.load_state_dict(torch.load(model_path, map_location=device))
+    model.eval()
+    return model
+
 def load_all_vaes(base_folder="experiments", max_decoder_num=3, Q=2, base_seed=1000, device = torch.device("cuda" if torch.cuda.is_available() else "cpu")):
     all_models = {}
 
-    folder = os.path.join(base_folder, f"vae_d{max_decoder_num}")
+    folder = os.path.join(base_folder)
     logger.info(f"Loading models from {folder}")
     for i in range(Q):
         seed = base_seed + i

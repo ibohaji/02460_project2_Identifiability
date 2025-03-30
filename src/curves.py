@@ -1,6 +1,10 @@
 import torch 
 import torch.nn as nn 
 from abc import ABC, abstractmethod
+from loguru import logger
+
+
+
 
 
 
@@ -14,11 +18,7 @@ class Curve(ABC):
     def energy(self):
         pass
 
-
-
-
-
-class CubicCurve(Curve):
+class CubicCurve(nn.Module):
     def __init__(self, c0, c1):
         """
         Cubic polynomial curve module with fixed endpoints and parameterized middle section.
@@ -89,7 +89,6 @@ def compute_curve_energy(curve, decoders, T=16, num_samples=1, fixed_indices=Non
     for i in range(T):
         t0 = torch.tensor([i / T], device=device, dtype=torch.float32)
         t1 = torch.tensor([(i + 1) / T], device=device, dtype=torch.float32)
-
         x0 = curve(t0)  # γ(t0), shape [1, d]
         x1 = curve(t1)  # γ(t1)
 
