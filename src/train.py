@@ -1,6 +1,7 @@
 import torch 
 from tqdm import tqdm 
 import os 
+from loguru import logger
 import math 
 import matplotlib.pyplot as plt 
 from torchvision import datasets, transforms
@@ -109,11 +110,12 @@ def train_super_vae_models(Q=10, epochs_per_decoder=400, base_seed=1000, max_dec
 
 
 
+
 def load_all_vaes(base_folder="experiments", max_decoder_num=3, Q=2, base_seed=1000, device = torch.device("cuda" if torch.cuda.is_available() else "cpu")):
     all_models = {}
 
     folder = os.path.join(base_folder, f"vae_d{max_decoder_num}")
-
+    logger.info(f"Loading models from {folder}")
     for i in range(Q):
         seed = base_seed + i
         name = f"vae_d{max_decoder_num}_seed{seed}"

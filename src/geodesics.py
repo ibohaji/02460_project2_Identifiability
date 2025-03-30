@@ -7,7 +7,7 @@ from tqdm import tqdm
 
 
 
-def optimize_geodesic(c0, c1, decoders, T=16, steps=500, lr=1e-2, device='cuda',
+def optimize_geodesic(c0, c1, curve,  decoders, T=16, steps=500, lr=1e-2, device='cuda',
                       early_stopping_n=100, early_stopping_delta=1e-4):
     """
     Optimize a geodesic curve while ensuring the objective function remains unchanged during optimization.
@@ -27,7 +27,7 @@ def optimize_geodesic(c0, c1, decoders, T=16, steps=500, lr=1e-2, device='cuda',
     - Optimized curve
     - Logged energy values
     """
-    curve = CubicCurve(c0, c1).to(device)  # Initialize the curve
+    curve = curve(c0, c1).to(device)  # Initialize the curve
     optimizer = torch.optim.Adam(curve.parameters(), lr=lr)  # Adam optimizer
     energy_log = []  # Store energy values
 

@@ -3,7 +3,7 @@ from src.vae import *
 from src.train import train_super_vae_models, load_all_vaes, train_single_vae
 from src.utils import set_seed 
 from configs import TrainingConfig
-
+from loguru import logger
 
 app = typer.Typer()
 
@@ -21,7 +21,33 @@ def A():
         epochs_per_decoder=TrainingConfig.epochs_per_decoder, 
         lr=TrainingConfig.learning_rate
         )
+    # Load the VAE 
+    models = load_all_vaes()
+    m = models["vae_d3_seed1000.pt"]
+    encoder = m.encoder
+
+    # load the data 
+    from src.data import train_data
+    data = train_data
+
+    # Encode the data 
+    encoded_data = encoder(data)
+    # minimize the energy of the curve 
+    from src.curves import CubicCurve, compute_curve_energy
+    curve = CubicCurve(encoded_data[0], encoded_data[1])
+    energy = compute_curve_energy(curve, m.decoders, T=TrainingConfig.num_time_steps, num_samples=TrainingConfig.num_samples, fixed_indices=None, device=TrainingConfig.device)
+    logger.info(f"Energy of the curve: {energy}")
+    # Compute the geodesics
+    from src.geodesics import optimize_geodesic
+    c0 = encoded_data[0]
+    c1 = encoded_data[1]
+    decoders = m.decoders
+    T = TrainingConfig.num_time_steps
+    steps = TrainingConfig.optimization_steps
+    lr = TrainingConfig.learning_rate
+    # Plot the geodesics 
     
+
 
 
 

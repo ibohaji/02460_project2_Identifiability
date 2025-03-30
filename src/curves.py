@@ -1,8 +1,24 @@
 import torch 
 import torch.nn as nn 
+from abc import ABC, abstractmethod
 
 
-class CubicCurve(nn.Module):
+
+
+class Curve(ABC):
+    @abstractmethod
+    def forward(self, t):
+        pass
+
+    @abstractmethod
+    def energy(self):
+        pass
+
+
+
+
+
+class CubicCurve(Curve):
     def __init__(self, c0, c1):
         """
         Cubic polynomial curve module with fixed endpoints and parameterized middle section.
