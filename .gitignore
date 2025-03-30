@@ -1,0 +1,13 @@
+*.pyc
+*.pt
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+
+__pycache__
+*/__pycache__
+/data
+data/ 
+experiments/
